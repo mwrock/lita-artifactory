@@ -150,4 +150,59 @@ The *angrychef* *12.0.0* build was not promoted to _current_ from _unstable_ bec
       expect(replies.last).to eq("Artifact repositories: repo1, repo2")
     end
   end
+
+  describe '#artifactory gem push' do
+    let(:gem_name)    { "my_gem" }
+    let(:gem_version) { "1.2.3" }
+
+    before do
+      @i = 1
+      allow(subject).to receive(:system) do |cmd|
+        if cmd.start_with?("gem fetch")
+          File.open("gem#{@i}.gem", "w") {}
+          @i += 1
+        end
+      end.and_return(true)
+    end
+
+    it "fetches ruby platform" do
+      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform ruby --clear-sources --source http://artifactory.chef.co/api/gems/gems-local/")
+      send_command("artifactory gem push #{gem_name} #{gem_version}")
+    end
+
+    it "fetches mingw platform" do
+      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform universal-mingw32 --clear-sources --source http://artifactory.chef.co/api/gems/gems-local/")
+      send_command("artifactory gem push #{gem_name} #{gem_version}")
+    end
+
+    it "pushes both gems to rubygems" do
+      expect(subject).to receive(:system).with("gem push gem1.gem")
+      expect(subject).to receive(:system).with("gem push gem2.gem")
+      send_command("artifactory gem push #{gem_name} #{gem_version}")
+    end
+
+    it "pushes ONLY both gems to rubygems" do
+      expect(subject).to receive(:system).exactly(4).times
+      send_command("artifactory gem push #{gem_name} #{gem_version}")
+    end
+
+    context "fail to fetch a gem" do
+      before do
+        allow(subject).to receive(:system) do |cmd|
+          if cmd.start_with?("gem fetch")
+            if cmd.include?("--platform ruby")
+              false
+            else
+              File.open("gem.gem", "w") {}
+            end
+          end
+        end
+      end
+
+      it "does not push anything to rubygems" do
+        expect(subject).not_to receive(:system).with("gem push gem.gem")
+        send_command("artifactory gem push #{gem_name} #{gem_version}")
+      end
+    end
+  end
 end
