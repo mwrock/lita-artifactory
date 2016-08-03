@@ -17,17 +17,34 @@ module Lita
       VERSION_REGEX     = /[\w\-\.\+\_]+/
       PROMOTION_CHANNEL = "stable"
 
-      route(/^artifact(?:ory)?\s+promote\s+#{PROJECT_REGEX.source}\s+#{VERSION_REGEX.source}/i, :promote, command: true, help: {
+      route(
+        /^artifact(?:ory)?\s+promote\s+#{PROJECT_REGEX.source}\s+#{VERSION_REGEX.source}/i,
+        :promote,
+        command: true,
+        restrict_to: [:artifactory_promoters],
+        help: {
               "artifactory promote" => "promote <artifact> <version>",
-            })
+              }
+            )
 
-      route(/^artifact(?:ory)?\s+repos(?:itories)?/i, :repos, command: true, help: {
+      route(
+        /^artifact(?:ory)?\s+repos(?:itories)?/i,
+        :repos,
+        command: true,
+        help: {
               "artifactory repos" => "list artifact repositories",
-            })
+              }
+            )
 
-      route(/^artifact(?:ory)?\s+gem\s+push\s+#{GEM_REGEX.source}\s+#{VERSION_REGEX.source}/i, :push, command: true, help: {
+      route(
+        /^artifact(?:ory)?\s+gem\s+push\s+#{GEM_REGEX.source}\s+#{VERSION_REGEX.source}/i,
+        :push,
+        command: true,
+        restrict_to: [:artifactory_promoters],
+        help: {
               "artifactory gem push" => "push <gem> <version>",
-            })
+              }
+            )
 
       def promote(response)
         project       = response.args[1]

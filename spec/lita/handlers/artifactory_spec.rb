@@ -3,6 +3,7 @@ require "spec_helper"
 describe Lita::Handlers::Artifactory, lita_handler: true do
   let(:endpoint) { "http://artifactory.chef.fake" }
   let(:client) { double("Artifactory::Client") }
+  let(:user_group) { :artifactory_promoters }
 
   before do
     allow(subject).to receive(:client).and_return(client)
@@ -13,10 +14,12 @@ describe Lita::Handlers::Artifactory, lita_handler: true do
   end
 
   it { is_expected.to route_command("artifactory repositories").to(:repos) }
-  it { is_expected.to route_command("artifactory promote thing 12.0.0 from here to there").to(:promote) }
+  it { is_expected.to route_command("artifactory promote thing 12.0.0 from here to there").with_authorization_for(user_group).to(:promote) }
+  it { is_expected.to route_command("artifactory gem push thing 12.0.0").with_authorization_for(user_group).to(:push) }
 
   describe '#artifactory promote' do
     before do
+      allow_any_instance_of(Lita::Authorization).to receive(:user_in_group?).with(anything, user_group).and_return(true)
       allow(client).to receive(:get).with("/api/build/angrychef/12.0.0").and_return(
         "uri" => "http://artifactory.chef.fake/api/build/angrychef/12.0.0",
         "buildInfo" => {
@@ -163,6 +166,7 @@ The *angrychef* *12.0.0* build was not promoted to _current_ from _unstable_ bec
           @i += 1
         end
       end.and_return(true)
+      allow_any_instance_of(Lita::Authorization).to receive(:user_in_group?).with(anything, user_group).and_return(true)
     end
 
     it "fetches ruby platform" do
