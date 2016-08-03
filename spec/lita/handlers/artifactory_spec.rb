@@ -176,8 +176,8 @@ The *angrychef* *12.0.0* build was not promoted to _current_ from _unstable_ bec
     end
 
     it "pushes both gems to rubygems" do
-      expect(subject).to receive(:system).with("gem push gem1.gem")
-      expect(subject).to receive(:system).with("gem push gem2.gem")
+      expect(subject).to receive(:system).with("gem push gem1.gem --key chef_rubygems_api_key")
+      expect(subject).to receive(:system).with("gem push gem2.gem --key chef_rubygems_api_key")
       send_command("artifactory gem push #{gem_name} #{gem_version}")
     end
 
@@ -200,7 +200,7 @@ The *angrychef* *12.0.0* build was not promoted to _current_ from _unstable_ bec
       end
 
       it "does not push anything to rubygems" do
-        expect(subject).not_to receive(:system).with("gem push gem.gem")
+        expect(subject).not_to receive(:system).with("gem push gem.gem --key chef_rubygems_api_key")
         send_command("artifactory gem push #{gem_name} #{gem_version}")
       end
     end

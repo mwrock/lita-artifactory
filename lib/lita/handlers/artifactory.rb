@@ -116,7 +116,7 @@ module Lita
             break if missing_gem
 
             Dir.glob("*.gem") do |gem_file|
-              if system("gem push #{gem_file}")
+              if system("gem push #{gem_file} --key chef_rubygems_api_key")
                 response.reply("Succesfully pushed #{human_name} to rubygems!")
               else
                 response.reply("Failed pushing #{human_name} to rubygems!")
