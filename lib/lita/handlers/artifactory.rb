@@ -101,7 +101,7 @@ module Lita
         ruby_gem      = response.args[2]
         version       = response.args[3]
         human_name    = "#{ruby_gem} gem version #{version}"
-        gem_source    = "http://artifactory.chef.co/api/gems/gems-local/"
+        gem_source    = "#{config.endpoint}/api/gems/gems-local/"
         missing_gem   = false
 
         Dir.mktmpdir do |dir|

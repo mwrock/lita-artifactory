@@ -166,12 +166,12 @@ The *angrychef* *12.0.0* build was not promoted to _current_ from _unstable_ bec
     end
 
     it "fetches ruby platform" do
-      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform ruby --clear-sources --source http://artifactory.chef.co/api/gems/gems-local/")
+      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform ruby --clear-sources --source #{endpoint}/api/gems/gems-local/")
       send_command("artifactory gem push #{gem_name} #{gem_version}")
     end
 
     it "fetches mingw platform" do
-      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform universal-mingw32 --clear-sources --source http://artifactory.chef.co/api/gems/gems-local/")
+      expect(subject).to receive(:system).with("gem fetch #{gem_name} --version #{gem_version} --platform universal-mingw32 --clear-sources --source #{endpoint}/api/gems/gems-local/")
       send_command("artifactory gem push #{gem_name} #{gem_version}")
     end
 
