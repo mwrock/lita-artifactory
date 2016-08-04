@@ -124,8 +124,12 @@ module Lita
         Dir.mktmpdir do |dir|
           Dir.chdir(dir) do
             %w{ruby universal-mingw32}.each do |platform|
-              unless system(fetch_command_for_platform(platform, ruby_gem, version, gem_source))
-                response.reply("There were errors retrieving the #{human_name} from #{gem_source}!")
+              cmd = Mixlib::ShellOut.new(fetch_command_for_platform(platform, ruby_gem, version, gem_source))
+              cmd.run_command
+              begin
+                cmd.error!
+              rescue Mixlib::ShellOut::ShellCommandFailed => e
+                response.reply(":warning: :warning: There were errors retrieving the #{human_name} from #{gem_source}! :warning: :warning:\n#{e}")
                 missing_gem = true
               end
             end
@@ -133,10 +137,13 @@ module Lita
             break if missing_gem
 
             Dir.glob("*.gem") do |gem_file|
-              if system("gem push #{gem_file} --key chef_rubygems_api_key")
-                response.reply("Succesfully pushed #{human_name} to rubygems!")
-              else
-                response.reply("Failed pushing #{human_name} to rubygems!")
+              cmd = Mixlib::ShellOut.new("gem push #{gem_file} --key chef_rubygems_api_key")
+              cmd.run_command
+              begin
+                cmd.error!
+                response.reply(":rockon: Succesfully pushed #{human_name} to rubygems! :rockon:")
+              rescue Mixlib::ShellOut::ShellCommandFailed => e
+                response.reply(":warning: :warning: Failed pushing #{human_name} to rubygems! :warning: :warning:\n#{e}")
               end
             end
           end
